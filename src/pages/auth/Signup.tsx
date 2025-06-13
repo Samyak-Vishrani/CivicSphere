@@ -26,7 +26,7 @@ const Signup = () => {
 
   const expertiseOptions = [
     'Plumbing', 'Electrical', 'Carpentry', 'Painting', 'HVAC', 
-    'Roofing', 'Flooring', 'Landscaping', 'Cleaning', 'General Maintenance'
+    'Pest Control', 'Flooring', 'Moving', 'Cleaning', 'General Maintenance'
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -190,7 +190,7 @@ const Signup = () => {
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                     </Button>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ const Signup = () => {
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                     </Button>
                   </div>
                 </div>

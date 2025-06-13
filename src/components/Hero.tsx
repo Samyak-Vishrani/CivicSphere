@@ -16,7 +16,7 @@ const Hero = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      {/* <div className="absolute inset-0 bg-grid-pattern opacity-5" /> */}
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -50,12 +50,12 @@ const Hero = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="gradient-primary text-white hover:shadow-lg transition-all duration-300">
+            <div className="flex flex-col sm:flex-row gap-4 justify-left">
+              <Button size="lg" className="gradient-primary text-white hover:shadow-lg hover:text-black hover:border-2 hover:border-black transition-all duration-200">
                 Need a Service
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="border-2 hover:bg-accent hover:text-accent-foreground">
+              <Button size="lg" variant="outline" className="border-2 hover:bg-accent hover:text-accent-foreground transition-all duration-300">
                 Join as Worker
                 <Users className="w-5 h-5 ml-2" />
               </Button>
