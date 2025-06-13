@@ -1,8 +1,4 @@
-
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   MapPin, 
   Clock, 
@@ -11,52 +7,32 @@ import {
   Filter,
   Briefcase,
   Star,
-  Phone
+  Phone,
+  MessageCircle
 } from 'lucide-react';
 import Header from '@/components/Header';
+import { useJobs } from '@/contexts/JobContext';
+import ChatModal from '@/components/Chat/ChatModal';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const WorkerDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [chatJobId, setChatJobId] = useState<number | null>(null);
+  const { getAvailableJobsByExpertise, acceptJob, jobs } = useJobs();
 
-  // Mock worker expertise (this would come from user profile)
-  const workerExpertise = ['Plumbing', 'General Maintenance'];
+  // Mock worker info (this would come from user profile/auth)
+  const workerInfo = {
+    name: 'John Smith',
+    phone: '+1-555-0123',
+    rating: 4.8,
+    expertise: ['Plumbing', 'General Maintenance']
+  };
 
-  // Mock available jobs (filtered by worker's expertise)
-  const availableJobs = [
-    {
-      id: 1,
-      title: 'Fix leaky kitchen faucet',
-      category: 'Plumbing',
-      description: 'Kitchen faucet has been dripping for weeks. Need quick fix.',
-      location: 'Downtown District',
-      urgency: 'high',
-      budget: '$100-150',
-      postedDate: '2 hours ago',
-      customer: 'Sarah Johnson'
-    },
-    {
-      id: 2,
-      title: 'Replace bathroom pipes',
-      category: 'Plumbing',
-      description: 'Old pipes need replacement in master bathroom.',
-      location: 'Residential Area',
-      urgency: 'medium',
-      budget: '$300-500',
-      postedDate: '1 day ago',
-      customer: 'Mike Davis'
-    },
-    {
-      id: 3,
-      title: 'General home maintenance check',
-      category: 'General Maintenance',
-      description: 'Monthly maintenance check for HVAC, plumbing, and electrical.',
-      location: 'Suburb Heights',
-      urgency: 'low',
-      budget: '$200-250',
-      postedDate: '3 days ago',
-      customer: 'Emily Chen'
-    }
-  ];
+  const availableJobs = getAvailableJobsByExpertise(workerInfo.expertise);
+  const activeJobs = jobs.filter(job => job.worker === workerInfo.name && job.status === 'in-progress');
+  const completedJobs = jobs.filter(job => job.worker === workerInfo.name && job.status === 'completed');
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
@@ -68,9 +44,15 @@ const WorkerDashboard = () => {
   };
 
   const handleAcceptJob = (jobId: number) => {
-    console.log('Accepting job:', jobId);
-    // TODO: Implement job acceptance logic
+    acceptJob(jobId, workerInfo);
+    console.log('Job accepted:', jobId);
   };
+
+  const handleStartChat = (jobId: number) => {
+    setChatJobId(jobId);
+  };
+
+  const chatJob = chatJobId ? jobs.find(job => job.id === chatJobId) : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-secondary">
@@ -81,7 +63,7 @@ const WorkerDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Worker Dashboard</h1>
           <p className="text-muted-foreground">
-            Jobs available in your expertise areas: {workerExpertise.join(', ')}
+            Jobs available in your expertise areas: {workerInfo.expertise.join(', ')}
           </p>
         </div>
 
@@ -103,7 +85,7 @@ const WorkerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Active Jobs</p>
-                  <p className="text-2xl font-bold">2</p>
+                  <p className="text-2xl font-bold">{activeJobs.length}</p>
                 </div>
                 <Clock className="h-8 w-8 text-accent" />
               </div>
@@ -114,7 +96,7 @@ const WorkerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Completed Jobs</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-2xl font-bold">{completedJobs.length}</p>
                 </div>
                 <Star className="h-8 w-8 text-warning" />
               </div>
@@ -125,7 +107,7 @@ const WorkerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Rating</p>
-                  <p className="text-2xl font-bold">4.8</p>
+                  <p className="text-2xl font-bold">{workerInfo.rating}</p>
                 </div>
                 <Star className="h-8 w-8 text-warning" />
               </div>
@@ -144,7 +126,7 @@ const WorkerDashboard = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="all">All Categories</option>
-              {workerExpertise.map((category) => (
+              {workerInfo.expertise.map((category) => (
                 <option key={category} value={category}>{category}</option>
               ))}
             </select>
@@ -198,8 +180,12 @@ const WorkerDashboard = () => {
                       >
                         Accept Job
                       </Button>
-                      <Button variant="outline" size="sm">
-                        View Details
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleStartChat(job.id)}
+                      >
+                        <MessageCircle className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -207,6 +193,53 @@ const WorkerDashboard = () => {
               </Card>
             ))}
         </div>
+
+        {/* Active Jobs Section */}
+        {activeJobs.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold mb-6">Active Jobs</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {activeJobs.map((job) => (
+                <Card key={job.id} className="border-primary/20">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="text-lg">{job.title}</CardTitle>
+                        <CardDescription>Customer: {job.customer}</CardDescription>
+                      </div>
+                      <Badge>In Progress</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Budget: {job.budget}</span>
+                        <span className="text-sm">Location: {job.location}</span>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Phone className="h-4 w-4 mr-1" />
+                          Call Customer
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStartChat(job.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Chat
+                        </Button>
+                        <Button size="sm" className="gradient-primary text-white">
+                          Mark Complete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {availableJobs.length === 0 && (
           <div className="text-center py-12">
@@ -218,6 +251,16 @@ const WorkerDashboard = () => {
           </div>
         )}
       </main>
+
+      {/* Chat Modal */}
+      {chatJob && (
+        <ChatModal
+          job={chatJob}
+          currentUserId={workerInfo.name}
+          currentUserType="worker"
+          onClose={() => setChatJobId(null)}
+        />
+      )}
     </div>
   );
 };
